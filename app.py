@@ -77,35 +77,37 @@ def main():
         # Extract text from the document or user-pasted text
         text = extract_text(document, user_text)
 
-        if text is not None:
-            sys_dict = {"role": "system", "content": text}
-            messages.append(sys_dict)
+        if text is None:
+            text = ""
 
-            st.text_area("Document Text", text, height=300)
+        sys_dict = {"role": "system", "content": text}
+        messages.append(sys_dict)
 
-            # Q&A Section
-            st.subheader("Ask a Question")
+        st.text_area("Document Text", text, height=300)
 
-            # Input field for user question
-            user_question = st.text_input("Type your question here:")
-            if st.button("Get Answer"):
-                if user_question:
-                    # Generate answer and display
-                    answer = generate_answer(user_question)
-                    st.write("Answer:", answer)
+        # Q&A Section
+        st.subheader("Ask a Question")
 
-                    # Store question and answer in history
-                    st.session_state.setdefault('qa_history', []).append({
-                        'question': user_question,
-                        'answer': answer
-                    })
+        # Input field for user question
+        user_question = st.text_input("Type your question here:")
+        if st.button("Get Answer"):
+            if user_question:
+                # Generate answer and display
+                answer = generate_answer(user_question)
+                st.write("Answer:", answer)
 
-            # Display Q&A history
-            st.subheader("Q&A History")
-            for item in st.session_state.qa_history:
-                st.write(f"Question: {item['question']}")
-                st.write(f"Answer: {item['answer']}")
-                st.markdown("---")
+                # Store question and answer in history
+                st.session_state.setdefault('qa_history', []).append({
+                    'question': user_question,
+                    'answer': answer
+                })
+
+        # Display Q&A history
+        st.subheader("Q&A History")
+        for item in st.session_state.qa_history:
+            st.write(f"Question: {item['question']}")
+            st.write(f"Answer: {item['answer']}")
+            st.markdown("---")
 
     except Exception as e:
         st.write(e)
