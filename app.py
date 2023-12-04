@@ -1,13 +1,13 @@
 import streamlit as st
 from docx import Document
 from openai import OpenAI
+from pypdf import PdfReader
 from dotenv import load_dotenv
-import fitz 
 import os
 load_dotenv()
 
-# client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
-client = OpenAI(api_key=st.secrets['OPENAI_API_KEY'])
+client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
+# client = OpenAI(api_key=st.secrets['OPENAI_API_KEY'])
 
 messages = []
 
@@ -15,16 +15,17 @@ messages = []
 def extract_text(uploaded_file, user_text):
     if uploaded_file is not None:
         if uploaded_file.type == "text/plain":
-            text = uploaded_file.read()
+            text = uploaded_file.read().decode("utf-8")
         elif uploaded_file.type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
             docx_file = Document(uploaded_file)
             text = "\n".join([paragraph.text for paragraph in docx_file.paragraphs])
         elif uploaded_file.type == "application/pdf":
-            pdf_document = fitz.open(uploaded_file)
             text = ""
-            for page_num in range(pdf_document.page_count):
-                page = pdf_document[page_num]
-                text += page.get_text()
+            # for pdf in uploaded_file:
+            pdf_reader = PdfReader(uploaded_file)
+            for page in pdf_reader.pages:
+                text += page.extract_text()
+
         else:
             st.warning("Please upload a valid text document (e.g., .txt)")
             return None
